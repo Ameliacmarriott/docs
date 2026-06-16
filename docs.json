@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "Blueprint Design System",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -15,6 +15,15 @@
         "pages": [
           "index",
           "quickstart"
+        ]
+      },
+      {
+        "group": "Components",
+        "pages": [
+          "components/button",
+          "components/checkbox",
+          "components/dropdown",
+          "components/segmented-control"
         ]
       }
     ],
