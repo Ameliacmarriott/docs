@@ -3,6 +3,10 @@ title: "Button - 2 + Dev spec"
 description: "Blueprint's interactive action control."
 ---
 
+<Note>
+  **Option 2 — added dev spec.** This is the alternative version: the page carries the usage guidance a designer needs as well as the full developer spec, which is behind a set of tabs on the same page to reduce scroll heigh.
+</Note>
+
 Button triggers an action. It carries a text label and up to two optional icons, and comes in four emphasis levels and three colour treatments so a single control covers everything from a page's primary call to action down to a near-link inline action.
 
 <CardGroup cols={2}>
