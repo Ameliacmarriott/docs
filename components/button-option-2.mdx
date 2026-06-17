@@ -1,0 +1,81 @@
+---
+title: "Button - 1 Guidance only"
+description: "Blueprint's interactive action control."
+---
+
+<Note>
+  **Option 1 — guidance only.** This is the recommended version: the page carries the usage guidance a designer needs, and the full developer spec stays in the repo rather than being published. Compare with Option 2, which tucks the full spec into tabs on the same page.
+</Note>
+
+Button triggers an action. It carries a text label and up to two optional icons, and comes in four emphasis levels and three colour treatments so a single control covers everything from a page's primary call to action down to a near-link inline action.
+
+<CardGroup cols={2}>
+  <Card title="View in Storybook" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-button">
+    Interactive component, all variants and states.
+  </Card>
+
+  <Card title="Open in Figma" icon="figma" href="https://www.figma.com/design/QJ0f6PWjR3ERLtDVz652b5/?node-id=3062-395">
+    Source component set.
+  </Card>
+</CardGroup>
+
+## When to use it
+
+Use a button when the user takes an action: submit, save, continue, download. For navigation between pages or to external destinations, use a link, not a button styled to look like one.
+
+## Choosing an appearance
+
+Appearance sets visual emphasis. Match it to the action's importance in the view, not to how the button looks on its own.
+
+| Appearance | Use it for | Guidance |
+| --- | --- | --- |
+| **Primary** | The single most important action in a view | Aim for one per view. Two Primary buttons compete and dilute the hierarchy. |
+| **Secondary** | An alternative or supporting action shown alongside a Primary | Outlined, lower emphasis. Common as the "cancel" or "back" beside a Primary. |
+| **Tertiary** | Low-emphasis actions where a full button would be too heavy | Reads as a text/link-style button. Good inline or in dense layouts. |
+| **Subdued** | The lowest-emphasis action, close to a plain link | Use where even Tertiary draws too much attention. |
+
+## Choosing a colour
+
+Colour adapts the button to its surface. It does not change emphasis or dimensions.
+
+| Colour | Use it on |
+| --- | --- |
+| **Default** | Standard light surfaces |
+| **Inverse** | Dark or coloured surfaces, where Default would not have enough contrast |
+| **Accent** | Brand-accent moments that warrant the yellow emphasis |
+
+## Content
+
+Label the action, not the appearance. "Submit", "Download report", "Save changes" — never "Click here" or "Blue button". Keep labels short and lead with a verb.
+
+Icons are optional and decorative. A leading or trailing icon can reinforce the label's meaning, but the label must stand on its own: the button has to make sense with the icon removed.
+
+## Accessibility essentials
+
+<AccordionGroup>
+  <Accordion title="The button is a single focus stop" icon="square-check">
+    The visible label becomes the accessible name. Don't add a separate label element or repeat the text in an `aria-label` — that double-announces.
+  </Accordion>
+
+  <Accordion title="Icons are hidden from assistive tech" icon="eye-slash">
+    Leading and trailing icons are decorative and must be hidden from screen readers. They duplicate the label's meaning; announcing them adds noise, not information.
+  </Accordion>
+
+  <Accordion title="Disabled removes the button from focus order" icon="ban">
+    A disabled button is not focusable and cannot be activated. Don't rely on it as the only signal that an action is unavailable — pair it with context so the reason is clear.
+  </Accordion>
+
+  <Accordion title="Label the action, not the state" icon="tag">
+    Don't bake "disabled" or "dimmed" into the label. The platform announces state via traits/role; the label stays the action.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+<Card title="Full developer spec" icon="code" href="https://github.com/Ameliacmarriott/docs">
+  The token-accurate implementation detail (API, structure, colour, accessibility) lives in the component spec in the repo, where engineers and the build pipeline consume it. It isn't published here by design — this page is about how to use the component, not how it's built.
+</Card>
+
+<Card title="Live component" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-button">
+  Replace the URL with the Storybook story. If the URLs are stable we can embed the iframe inline here instead of linking out.
+</Card>

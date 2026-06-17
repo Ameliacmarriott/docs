@@ -1,16 +1,12 @@
 ---
-title: "Button"
+title: "Button - 2 + Dev spec"
 description: "Blueprint's interactive action control."
 ---
-
-<Note>
-  This is a **worked example** of the usage-first structure. The usage guidance below is illustrative, inferred from the spec to show the shape. In the real pipeline it should be sourced from `/describe-component` (declared intent), not hand-authored here. The developer spec in the tabs is the existing `/create-component-md` output, tucked behind progressive disclosure rather than leading the page.
-</Note>
 
 Button triggers an action. It carries a text label and up to two optional icons, and comes in four emphasis levels and three colour treatments so a single control covers everything from a page's primary call to action down to a near-link inline action.
 
 <CardGroup cols={2}>
-  <Card title="View in Storybook" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-button">
+  <Card title="View in Storybook" icon="play" href="https://atomic.devteam.savills.com/latest/?path=/story/atoms-button--primary">
     Interactive component, all variants and states.
   </Card>
 
