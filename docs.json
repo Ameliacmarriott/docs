@@ -53,8 +53,8 @@
         "group": "Atoms",
         "icon": "atom-simple",
         "pages": [
+          "components/button-option-1",
           "components/button-option-2",
-          "components/button",
           "components/checkbox",
           "components/dropdown",
           "components/segmented-control"
