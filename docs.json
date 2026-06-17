@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Blueprint Design System",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#25273A",
+    "light": "#FFDF00",
+    "dark": "#FFDF00"
   },
   "favicon": "/favicon.svg",
   "navigation": {
