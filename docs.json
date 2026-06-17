@@ -54,6 +54,7 @@
         "icon": "atom-simple",
         "pages": [
           "components/button-option-1",
+          "components/button-2-w-dev-spec",
           "components/checkbox",
           "components/dropdown",
           "components/segmented-control"
