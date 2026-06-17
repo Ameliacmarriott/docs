@@ -40,7 +40,31 @@
           "icon": "newspaper"
         }
       ]
-    }
+    },
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Atoms",
+        "icon": "atom-simple",
+        "pages": [
+          "components/button",
+          "components/checkbox",
+          "components/dropdown",
+          "components/segmented-control"
+        ]
+      },
+      {
+        "group": "Molecules",
+        "icon": "shapes",
+        "pages": []
+      }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",

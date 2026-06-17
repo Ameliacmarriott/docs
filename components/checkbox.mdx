@@ -1,0 +1,223 @@
+---
+title: "Checkbox"
+description: "A tri-state selection control for choosing one or more options."
+---
+
+<Note>
+  This is a **worked example** of the usage-first structure, matching the Button example. The usage guidance below is illustrative, inferred from the spec to show the shape. In the real pipeline it should be sourced from `/describe-component` (declared intent), not hand-authored here. The developer spec in the tabs is the existing `/create-component-md` output, tucked behind progressive disclosure rather than leading the page.
+</Note>
+
+Checkbox lets a user select one or more independent options, or toggle a single setting on and off. It is tri-state: as well as checked and unchecked, it has an _indeterminate_ state for a "select all" control whose group is only partially selected. Each checkbox carries an optional label and helper text, and can render as a bare control where the surrounding layout supplies its meaning.
+
+<CardGroup cols={2}>
+  <Card title="View in Storybook" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-checkbox">
+    Interactive component, all selection states and validation.
+  </Card>
+
+  <Card title="Open in Figma" icon="figma" href="https://www.figma.com/design/QJ0f6PWjR3ERLtDVz652b5/?node-id=3543-3432">
+    Source component set.
+  </Card>
+</CardGroup>
+
+## When to use it
+
+Use a checkbox when options are independent and a user can select any number of them, including none, or to toggle a single binary setting (accept terms, opt in).
+
+Reach for a different control when:
+
+- **Only one option may be chosen from several** — use radio buttons.
+- **The setting takes effect immediately**, with no form to submit — a toggle/switch communicates that better than a checkbox.
+
+## Selection states
+
+| State | When to use it |
+| --- | --- |
+| **Unchecked** | The default. The option is not selected. |
+| **Checked** | The option is selected. |
+| **Indeterminate** | Reserved for a "select all" parent whose child group is _partially_ selected. It is a visual parent state only and is never submitted as a value. Don't use it to mean "unknown" or "optional". |
+
+## Labels and helper text
+
+Write the label as the thing being selected, phrased so checking it reads as agreement or inclusion: "Email me about new features", not "Email notifications setting". Avoid negatives — "Don't send me email" inverts the logic and trips people up.
+
+Helper text is optional supporting copy beneath the label. Keep it to clarification the label can't carry on its own. In the error state, the helper row is where the validation message goes — the control itself shows no message.
+
+You can also render a checkbox with **no label** (`hasLabel: false`) for bare controls in a table row, card grid, or as a "select all" header, where the surrounding layout supplies the meaning. If you do, make sure an accessible name is still provided in code (see the Voice tab).
+
+## Validation
+
+`isInvalid` styles the control as in error — most commonly a required checkbox the user hasn't ticked (accepting terms, for example). Pair it with a visible message in the helper row; the control alone gives no text. If a checkbox is both invalid and disabled, disabled wins visually and the error styling is suppressed.
+
+## Accessibility essentials
+
+The detail lives in the developer spec below; these are the points a designer needs to get right.
+
+<AccordionGroup>
+  <Accordion title="The checkbox is one focus stop" icon="square-check">
+    Label and helper text merge into the control's accessible name and description — neither is a separate stop. Don't duplicate the label text elsewhere.
+  </Accordion>
+
+  <Accordion title="Indeterminate announces as 'mixed'" icon="minus">
+    The tri-state value is exposed to assistive tech: checked, unchecked, or mixed. Indeterminate is "mixed", not a third checked value — only use it for partial-selection parents.
+  </Accordion>
+
+  <Accordion title="A bare checkbox still needs a name" icon="tag">
+    If you drop the visible label (`hasLabel: false`), the control must still get an accessible name in code, or screen-reader users hit an unlabelled checkbox.
+  </Accordion>
+
+  <Accordion title="Errors fold into state, not a separate announcement" icon="triangle-exclamation">
+    Don't announce the error glyph as its own element. The invalid state and its message attach to the control (`aria-invalid` \+ the described-by message), so it's read as part of the one stop.
+  </Accordion>
+
+  <Accordion title="Disabled removes it from focus order" icon="ban">
+    A disabled checkbox isn't focusable or actionable. Don't rely on it as the only signal an option is unavailable — give context for why.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Developer spec
+
+<Note>
+  Everything below is the token-accurate implementation detail, sourced from `/create-component-md`. It's reference, not reading — tucked into tabs so it doesn't bury the usage guidance above.
+</Note>
+
+<Tabs>
+  <Tab title="API">
+    > Selection is a three-state value (unchecked, checked, indeterminate); indeterminate is a visual-only parent state used by "select all" patterns and never submitted. The Figma `State` axis mixes transient interaction visuals (Hover, Focus) with persistent configuration (Error, Disabled); only the persistent states are exposed as API props (`isInvalid`, `isDisabled`). When `isDisabled=true` the control is non-interactive and error styling is suppressed (disabled wins). `hasLabel` and `hasHelperText` are independent visibility toggles.
+
+    ### Properties
+
+    | Property | Type | Values | Default | Notes |
+    | --- | --- | --- | --- | --- |
+    | selection | variant | unchecked \| checked \| indeterminate | unchecked | Value state. `indeterminate` is a parent/select-all visual only. Figma axis "Selection". |
+    | isInvalid | boolean | true \| false | false | Error/validation styling. Maps to Figma "State=Error". Pair with an external error message. |
+    | isDisabled | boolean | true \| false | false | Non-interactive, dimmed. Maps to Figma "State=Disabled". Suppresses error styling when also invalid. |
+    | hasLabel | boolean | true \| false | true | Renders the Label slot. Set false for bare controls in table-row, card-grid, or "select all" layouts. |
+    | label | text | (string) | Label | Only meaningful when `hasLabel = true`. |
+    | hasHelperText | boolean | true \| false | true | Renders the Helper text row beneath the label. |
+    | helperText | text | (string) | Helper text | Only meaningful when `hasHelperText = true`. |
+
+    <Accordion title="State axis mapping">
+      The Figma `State` axis is decomposed into the persistent API props. Each option maps to a runtime condition:
+
+      | Figma `State` | isInvalid | isDisabled | Runtime condition |
+      | --- | --- | --- | --- |
+      | Default | false | false | rest |
+      | Hover | false | false | hovered (transient, platform-handled) |
+      | Focus | false | false | focused (transient, platform-handled) |
+      | Error | true | false | isInvalid |
+      | Disabled | false | true | isDisabled |
+    </Accordion>
+
+    <Accordion title="Worked examples">
+      - **Unchecked, label \+ helper** — `selection: unchecked`, `hasLabel: true`, `hasHelperText: true`
+      - **Checked, label only** — `selection: checked`, `hasHelperText: false`
+      - **Indeterminate select-all** — `selection: indeterminate`, `label: "Select all"`
+      - **Error** — `isInvalid: true`, `helperText: "You must accept to continue"`
+    </Accordion>
+  </Tab>
+  <Tab title="Structure">
+    > Checkbox has no size/density/shape axes — dimensions are constant. The visible box is the 24 Control frame, whose 1px border is bound to a border-color token, painted inside so the footprint stays fixed. Selection swaps the centered 16px glyph (none / check / minus) inside the constant 24 box. The only dimensional change across states is the Control border weight (1 → 2 in Hover/Focus/Error).
+
+    ### Typography
+
+    | Element | Family | Weight | Size | Line height | Style | Notes |
+    | --- | --- | --- | --- | --- | --- | --- |
+    | label | Gotham | Book | 16 | 26 | Body/M | Primary label; wraps. Rendered when `hasLabel=true`. |
+    | helperText | Gotham | Book | 14 | 22 | Body/S | Supporting copy; carries error guidance in the Error state. Rendered when `hasHelperText=true`. |
+
+    ### Composition
+
+    | Spec | Value | Notes |
+    | --- | --- | --- |
+    | Host container | horizontal, hug | Root layout holding control \+ text zones; itemSpacing 0 (spacing owned by Content) |
+    | Content | horizontal, fill / hug | Inner frame; contentSpacing `spacing/fixed/xxs` (8) between control and text zone |
+    | Control zone | fixed 24 × 24 | Fixed footprint, independent of label length |
+    | Text content zone | fill / hug | Vertical Label \+ Helper stack. Hidden entirely when `hasLabel=False` |
+
+    <Accordion title="Control box & glyph">
+      Fixed 24 square at all selection states. cornerRadius 0, borderWidth 1 (bound to border-color token, inside align so the box never grows). Glyph: centered icon instance, absent when unchecked; `check` when checked, `minus` when indeterminate; iconSize 16 (4 optical margin per side).
+    </Accordion>
+
+    <Accordion title="Text content zone">
+      Vertical stack, itemSpacing `spacing/fixed/xxxs` (4). Label: Body/M (Gotham Book 16/26), fills width and wraps. Helper text: Body/S (Gotham Book 14/22), rendered when `hasHelperText=true`, carries error guidance in the Error state.
+    </Accordion>
+
+    <Accordion title="Interactive states (border weight)">
+      The Control box border weight is the only dimensional property that changes across the State axis:
+
+      | Spec | rest | hovered | focused | error | disabled |
+      | --- | --- | --- | --- | --- | --- |
+      | borderWidth | 1 | 2 | 2 | 2 | 1 |
+      | borderAlign | inside | inside | inside | inside | inside |
+
+      Thickens to 2 in Hover/Focus/Error to strengthen the affordance; returns to 1 when Disabled. Inside alignment keeps the 24 footprint fixed.
+    </Accordion>
+  </Tab>
+  <Tab title="Color">
+    > Selection collapses to two colour groups: Unchecked (white surface, dark border) and the selected group. Checked and Indeterminate share identical tokens, differing only in glyph shape. Hover overlay on the filled control binds to the `opacity/white-20` primitive. State columns are relabelled from Figma options to the runtime conditions an engineer controls.
+
+    ### Unchecked
+
+    | Element | rest | hovered | focused | isInvalid | isDisabled |
+    | --- | --- | --- | --- | --- | --- |
+    | Control fill | surface/default (#FFFFFF) | surface/default | surface/default | surface/default | surface/disabled (#CACACA) |
+    | Control stroke | border/default (#1A1A1A) | border/default | border/default | border/error (#C00B28) | border/subtlest (#BDBDBD) |
+    | Focus indicator | none | none | border/default | none | none |
+    | Label | text/default (#1A1A1A) | text/default | text/default | text/default | text/subtlest (#7A7A7A) |
+    | Helper text | text/subtle (#525252) | text/subtle | text/subtle | text/error (#C00B28) | text/subtlest (#7A7A7A) |
+
+    ### Checked / Indeterminate
+
+    Identical tokens; only the glyph shape differs (check vs minus).
+
+    | Element | rest | hovered | focused | isInvalid | isDisabled |
+    | --- | --- | --- | --- | --- | --- |
+    | Control fill | icon/default (#1A1A1A) | icon/default | icon/default | icon/error (#C00B28) | surface/disabled-inverse (#7A7A7A) |
+    | State layer | none | opacity/white-20 | none | none | none |
+    | Focus indicator | none | none | border/default | none | none |
+    | Icon fill | icon/inverse (#FFFFFF) | icon/inverse | icon/inverse | icon/inverse | icon/inverse |
+    | Label | text/default (#1A1A1A) | text/default | text/default | text/default | text/subtlest (#7A7A7A) |
+    | Helper text | text/subtle (#525252) | text/subtle | text/subtle | text/error (#C00B28) | text/subtlest (#7A7A7A) |
+  </Tab>
+  <Tab title="Voice / Screen reader">
+    > Checkbox is a single focus stop with role "checkbox". The visible Label merges into the accessible name and the optional Helper text into its description — neither is a separate stop. Tri-state: `aria-checked` reflects true / false / mixed (mixed = Indeterminate). The invalid state folds into the stop's state (`aria-invalid`) with the message surfaced via `aria-describedby` — not a standalone live region. Disabled removes the checkbox from the focus order entirely. Web prefers a native `<input type="checkbox">`.
+
+    ### Rest — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | element | `<input type="checkbox">` | Native input; role "checkbox" implicit. |
+    | label association | `<label for>` / aria-labelledby | Visible Label associated with the input, not a separate stop. |
+    | aria-checked | true / false / mixed | Tri-state Selection; "mixed" for Indeterminate. |
+    | aria-describedby | helper-text-id (when present) | Optional Helper text as description. |
+    | Do NOT | duplicate the label | Don't expose the label node as a separate focusable element. |
+
+    ### Invalid — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | aria-invalid | true | Set on the input itself. |
+    | aria-checked | true / false / mixed | Tri-state value still applies. |
+    | aria-describedby / aria-errormessage | error-text-id | Associate the visible error/helper text. |
+    | Do NOT | announce the error glyph alone | Fold it into the stop's state. |
+
+    ### Disabled — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | element | `<input type="checkbox" disabled>` | Native disabled removes it from tab order. |
+    | aria-disabled | true (if kept perceivable) | Only when it must stay perceivable but inert. |
+
+    <Accordion title="iOS (VoiceOver) & Android (TalkBack)">
+      **VoiceOver** — rest: "Label, unchecked, checkbox" (checked / mixed for the other values) via `accessibilityValue`; helper text merges as `accessibilityHint`; invalid appends "invalid data" \+ message into the value; disabled uses `.notEnabled` and drops from the rotor. **TalkBack** — merge the label via `mergeDescendants`, role `Role.Checkbox`, `stateDescription` carries checked / not checked / partially checked; invalid uses `error(true)` / `setError(message)`; disabled sets `isEnabled=false` and leaves traversal. In both, keep the stop at index 1 across states so gestures stay predictable.
+    </Accordion>
+  </Tab>
+</Tabs>
+
+---
+
+<Card title="Live component" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-checkbox">
+  Replace the URL with the Storybook story. If the URLs are stable we can embed the iframe inline here instead of linking out.
+</Card>

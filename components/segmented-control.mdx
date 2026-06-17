@@ -1,0 +1,192 @@
+---
+title: "Segmented Control"
+description: "A compact single-select for switching between a few mutually exclusive views."
+---
+
+<Note>
+  This is a **worked example** of the usage-first structure, matching Button, Checkbox and Dropdown. The usage guidance below is illustrative, inferred from the spec to show the shape. In the real pipeline it should be sourced from `/describe-component` (declared intent), not hand-authored here. The developer spec in the tabs is the existing `/create-component-md` output, tucked behind progressive disclosure.
+</Note>
+
+Segmented Control is a compact single-select: two or more mutually exclusive segments in a pill-shaped track, with exactly one active at a time. The Blueprint instance ships with two fixed segments, "Buy" and "Rent". It's the control for switching between a small set of related views or filters where all options should stay visible.
+
+<CardGroup cols={2}>
+  <Card title="View in Storybook" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-segmented-control">
+    Interactive component, both options and all states.
+  </Card>
+
+  <Card title="Open in Figma" icon="figma" href="https://www.figma.com/design/QJ0f6PWjR3ERLtDVz652b5/?node-id=3125-1920">
+    Source component set.
+  </Card>
+</CardGroup>
+
+## When to use it
+
+Use a segmented control to switch between a small number (two, ideally not more than four or five) of mutually exclusive views, modes, or filters that the user benefits from seeing all at once. "Buy / Rent" is the canonical case: two persistent, equally weighted choices that frame everything below them.
+
+Reach for a different control when:
+
+- **The options are a form input you submit** — use radio buttons or a dropdown. A segmented control reads as an immediate view switch, not a field you fill in.
+- **There are more than ~5 options, or the labels are long** — segments get cramped and the labels truncate. Use a dropdown.
+- **The choice triggers an action rather than switching a view** — use buttons.
+- **It's a binary on/off setting** — use a toggle.
+
+The distinction from a dropdown matters: a segmented control keeps every option visible and switches instantly, which suits primary, high-frequency choices. A dropdown hides options behind a click, which suits longer or lower-frequency lists.
+
+## Labels
+
+Keep segment labels to one or two words so they fit the fixed track without truncating. Use parallel phrasing across segments ("Buy / Rent", not "Buy / For rent"). The control is single-select and always has exactly one active segment, so there's no "none selected" state to design for.
+
+## Accessibility essentials
+
+The detail lives in the developer spec below; these are the points a designer needs to get right.
+
+<AccordionGroup>
+  <Accordion title="It's a radio group, not a row of buttons" icon="square-check">
+    Screen readers announce it as a radio group with each segment a radio option ("Buy, selected, 1 of 2"). That selection semantic is the whole point — don't let it be built as plain buttons, which lose the one-of-many relationship.
+  </Accordion>
+
+  <Accordion title="One tab stop, arrow keys move selection" icon="arrows-left-right">
+    The group is a single tab stop. Arrow keys move between segments (roving focus). Tab moves past the whole control, not through each segment.
+  </Accordion>
+
+  <Accordion title="The focus ring is decorative" icon="eye-slash">
+    The offset outline that appears on focus is a visual ring only. It must never be announced.
+  </Accordion>
+
+  <Accordion title="Disabled removes the whole control from focus order" icon="ban">
+    When disabled, neither segment is reachable. The current selection stays visible but the control is inert — give context for why if it matters.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Developer spec
+
+<Note>
+  Everything below is the token-accurate implementation detail, sourced from `/create-component-md`. It's reference, not reading — tucked into tabs so it doesn't bury the usage guidance above.
+</Note>
+
+<Tabs>
+  <Tab title="API">
+    > Single-select with two fixed segments, "Buy" and "Rent". Selection is mutually exclusive, controlled by `value`. The Figma `State` axis encodes interaction states; Hover and Focus are transient and not API props, while Disabled is exposed as `isDisabled`. Segment labels are fixed in this design instance (the canonical `segments` array isn't consumer-editable here).
+
+    ### Properties
+
+    | Property | Type | Values | Default | Notes |
+    | --- | --- | --- | --- | --- |
+    | segments | array | Segment\[\] | – | Ordered array of selectable segments. This instance is designed with two fixed segments, "Buy" and "Rent"; each is a text label. |
+    | value | enum | Buy \| Rent | Buy | Currently selected segment (single-select). Maps to the Figma "Option" axis. |
+    | isDisabled | boolean | true \| false | false | Disables the whole control. Maps to Figma "State=Disabled". |
+
+    <Accordion title="Worked examples">
+      - **Buy selected (default)** — `value: "Buy"`, `isDisabled: false`
+      - **Rent selected** — `value: "Rent"`
+      - **Disabled** — `value: "Buy"`, `isDisabled: true`
+    </Accordion>
+  </Tab>
+  <Tab title="Structure">
+    > Dimensions are fixed (141 × 32) and byte-identical across the Buy/Rent options and the Default, Hover, and Disabled states. Buy and Rent are kept as separate columns in the source to document that intentional symmetry. The selected segment carries a 0.5 hairline outline (outside align) forming the pill "thumb"; the unselected segment has no border. Focus is the only state that changes structure — it adds an offset outline ring. The two Segment layers are plain decorative frames, not component instances.
+
+    ### Typography
+
+    | Element | Family | Weight | Size | Line height | Style |
+    | --- | --- | --- | --- | --- | --- |
+    | Segment label (both) | Gotham | Medium | 14 | 22 | Body/S Medium |
+
+    ### Container & segments
+
+    | Spec | Value | Notes |
+    | --- | --- | --- |
+    | Container width × height | 141 × 32 | Fixed; compact single row |
+    | Container padding | 2 | Uniform inset so the thumb sits 2px inside the track |
+    | Container itemSpacing | spacing/fixed/xxxs (4) | Gap between segments |
+    | Container cornerRadius | 1000 | Full pill; clipsContent true |
+    | Segment width × height | 66.5 × 28 | Each fills half the track |
+    | Segment padding | 4 vertical / 8 horizontal | `spacing/fixed/xxxs` / `spacing/fixed/xxs` |
+    | Segment cornerRadius | 1000 | Nests inside the track radius |
+    | Selected segment border | 0.5, outside align | Hairline marks the active segment; absent on the unselected one |
+
+    <Accordion title="Focus state (structural delta)">
+      Focus is the only state that changes structure. It adds a Focus indicator ring around the whole control:
+
+      | Spec | Focus |
+      | --- | --- |
+      | width × height | 149 × 40 (extends 4px beyond the track each side) |
+      | cornerRadius | 1000 |
+      | borderWidth | 2 (meets WCAG 2.4.13 focus appearance) |
+      | borderAlign | inside |
+
+      This layer exists only in the Focus variant, so it has no node in the default variant's layout tree (see the known gap below).
+    </Accordion>
+
+    <Warning>
+      Known gap (Medium): the Focus indicator's node ID couldn't be resolved because the layer exists only in the Focus variant, absent from the default variant's layout tree. Dimensions are documented above and implementable; the render-meta link to the live layer is what's missing.
+    </Warning>
+  </Tab>
+  <Tab title="Color">
+    > The Option axis (Buy / Rent) selects which segment is active and does not change colour tokens — one segment shows the white highlight while the other stays on the dark track. Hover reuses Default tokens unchanged.
+
+    ### Default / Hover
+
+    | Element | Token |
+    | --- | --- |
+    | Track fill | surface/inverse (#25273A) |
+    | Selected segment fill | surface/default (#FFFFFF) |
+    | Selected segment label | text/default (#1A1A1A) |
+    | Unselected segment label | text/subtle-inverse (#CACACA) |
+
+    ### Focus (adds)
+
+    | Element | Token |
+    | --- | --- |
+    | Focus indicator stroke | border/default (#1A1A1A) |
+
+    ### Disabled
+
+    | Element | Token |
+    | --- | --- |
+    | Track fill | surface/disabled (#CACACA) |
+    | Selected segment fill | surface/default (#FFFFFF) |
+    | Selected segment label | text/subtlest (#7A7A7A) |
+    | Unselected segment label | text/subtlest-inverse (#666666) |
+  </Tab>
+  <Tab title="Voice / Screen reader">
+    > Expose it as a group with radio selection semantics — `radiogroup` on Web, `RadioGroup` / `selectableGroup` on Android, a container element on iOS — with each segment a radio child. One tab stop; arrow keys move selection (roving focus), so only the selected segment is in the Tab order. Each segment's label merges into its accessible name. Selection is announced via state (`aria-checked` / `.isSelected` / `selected`), with "X of 2" set position. The focus-ring rectangle is decorative. Disabled removes the whole control from focus order.
+
+    ### Focus order
+
+    | # | Part | Announcement | Role |
+    | --- | --- | --- | --- |
+    | 1 | Group | "Buy or Rent, radio group" | radiogroup (single tab stop) |
+    | 2 | Selected segment | "Buy, selected, radio button, 1 of 2" | radio (in Tab order, roving) |
+    | 3 | Unselected segment | "Rent, radio button, 2 of 2" | radio (via arrow keys) |
+
+    ### Rest — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | group role | radiogroup | Establishes the single-select set; announced as context. |
+    | segment role | radio | Prefer native `<input type="radio">` styled as a segment. |
+    | aria-checked | true on selected, false otherwise | Marks the active segment. |
+    | tabindex | 0 on selected, -1 on others | Roving tabindex; arrow keys move selection. |
+    | aria-posinset / aria-setsize | 1 / 2, 2 / 2 | Set position announced as "X of 2". |
+    | Do NOT | announce the focus ring | Decorative; `aria-hidden="true"` or render via CSS `:focus-visible`. |
+
+    ### Disabled — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | aria-disabled | true | Set on the group and each radio; prefer native `disabled` so they leave the Tab order. |
+    | Do NOT | keep segments focusable | Use native `disabled` or remove from tab order — not `aria-disabled` alone on a div. |
+
+    <Accordion title="iOS (VoiceOver) & Android (TalkBack)">
+      **VoiceOver** — group is a container with `.adjustable` (or `.tabBar`); selected segment `[.isButton, .isSelected]` \+ `accessibilityValue` "1 of 2"; unselected drops `.isSelected`; disabled uses `.notEnabled`. **TalkBack** — `Modifier.selectableGroup()` \+ `isTraversalGroup` on the container; segments `Role.RadioButton` with `selected` / `stateDescription`; disabled via `disabled()` on group and segments. In both, merge each label via the platform mechanism, never announce a segment without its parent group, and keep stop indices stable across states.
+    </Accordion>
+  </Tab>
+</Tabs>
+
+---
+
+<Card title="Live component" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-segmented-control">
+  Replace the URL with the Storybook story. If the URLs are stable we can embed the iframe inline here instead of linking out.
+</Card>

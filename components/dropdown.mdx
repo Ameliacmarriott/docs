@@ -1,0 +1,254 @@
+---
+title: "Dropdown"
+description: "A single-select field that opens a menu of options."
+---
+
+<Note>
+  This is a **worked example** of the usage-first structure, matching Button and Checkbox. The usage guidance below is illustrative, inferred from the spec to show the shape. In the real pipeline it should be sourced from `/describe-component` (declared intent), not hand-authored here. The developer spec in the tabs is the existing `/create-component-md` output, tucked behind progressive disclosure.
+</Note>
+
+Dropdown is a single-select combobox: a labelled field that opens a menu of options and shows the chosen one. It supports a label, helper text, required/optional marking, validation states, and a scrolling menu for long option lists.
+
+<CardGroup cols={2}>
+  <Card title="View in Storybook" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-dropdown">
+    Interactive component, open/closed menu and validation states.
+  </Card>
+
+  <Card title="Open in Figma" icon="figma" href="https://www.figma.com/design/QJ0f6PWjR3ERLtDVz652b5/?node-id=3124-770">
+    Source component set.
+  </Card>
+</CardGroup>
+
+## When to use it
+
+Use a dropdown to let a user pick **one** option from a list that's too long to show comfortably inline, or where vertical space is tight. As a rough guide, reach for it once a list passes five to seven options.
+
+Reach for a different control when:
+
+- **The list is short (under ~5)** — radio buttons show all options at once with no extra click, which is usually better.
+- **Users can pick more than one** — this is single-select only. Use a multi-select pattern or a list of checkboxes.
+- **The choice is binary** — use a checkbox or toggle, not a two-item dropdown.
+- **The items are actions, not values** — use a menu button. A dropdown selects a value; it doesn't trigger commands.
+
+## Label, required and optional
+
+Always give a dropdown a visible label. Bare placeholder-as-label fails the moment a value is selected and the placeholder disappears.
+
+Required and optional marking is mutually exclusive — a field is required (shows `*`), optional (shows "(optional)"), or neither. Pick one convention per form and hold to it: mark every optional field, or mark every required field, but don't mix both in the same form or you double the user's cognitive load.
+
+## Placeholder vs value
+
+The field shows the selected value if there is one, otherwise the placeholder, otherwise nothing. Write the placeholder as an instruction ("Select a country"), not as a fake option. Don't rely on it to carry meaning the label should hold.
+
+## Validation
+
+| State | Use it for |
+| --- | --- |
+| **Default** | The normal resting state. |
+| **Error** | A failed validation. Pair it with `errorText` in the message row — the error styling alone gives no explanation. |
+| **Success** | An optional confirmation treatment for a valid selection. Use sparingly; constant green ticks become noise. |
+
+## Accessibility essentials
+
+The detail lives in the developer spec below; these are the points a designer needs to get right.
+
+<AccordionGroup>
+  <Accordion title="Two focus stops: the field, then the options" icon="list">
+    The field is always stop one. When the menu opens, each option becomes reachable. The label, value, helper text, required/optional marker all merge into the field's announcement — none is a separate stop.
+  </Accordion>
+
+  <Accordion title="A real select is announced as a combobox" icon="square-check">
+    Screen readers announce it as a combobox/drop-down with its expanded/collapsed state. This comes for free with a native control; custom implementations have to recreate it carefully (see the Voice tab).
+  </Accordion>
+
+  <Accordion title="The error message attaches to the field" icon="triangle-exclamation">
+    Don't announce the error icon as its own element. The invalid state and message bind to the field (`aria-invalid` \+ the described-by error text), read as part of stop one.
+  </Accordion>
+
+  <Accordion title="Chevron and scrollbar are decorative" icon="eye-slash">
+    The chevron and the menu scrollbar carry no meaning for assistive tech and must be hidden from it.
+  </Accordion>
+
+  <Accordion title="Disabled removes the field from focus order" icon="ban">
+    A disabled dropdown can't be focused or opened. Give context for why it's unavailable rather than leaving the user guessing.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Developer spec
+
+<Warning>
+  **Known gap from extraction (High).** The Menu item is modelled inconsistently between layers — the API treats it as a sub-component with a `label` prop; the structure treats it as a referenced library instance, and its component identity wasn't resolved. Engineers should expect to supply options as an array and confirm the Menu item contract against the live Storybook component before building. Two lower-severity notes: "Menu item" identity unresolved, and the Success validation state is colour-only (no structural delta).
+</Warning>
+
+<Note>
+  Everything below is the token-accurate implementation detail, sourced from `/create-component-md`. It's reference, not reading — tucked into tabs so it doesn't bury the usage guidance above.
+</Note>
+
+<Tabs>
+  <Tab title="API">
+    > The Field resolves its displayed content by priority: selected `value`, else `placeholder`, else empty. The Figma `Content` axis (Empty / Selected Option / Placeholder Text) is the visual projection of that state, not a runtime prop. `requirement` is mutually exclusive (required / optional / none), merged from two Figma booleans. `isMenuOpen` drives `aria-expanded`; `hasScrollingMenu` only matters when the menu is open.
+
+    ### Properties
+
+    | Property | Type | Values | Default | Notes |
+    | --- | --- | --- | --- | --- |
+    | validationState | variant | default \| success \| error | default | Validation styling and messaging. error pairs with errorText; success is a confirmation treatment. |
+    | isDisabled | boolean | true \| false | false | Persistent disabled state (Hover/Focus are transient, not props). Exposes `aria-disabled=true`. |
+    | isMenuOpen | boolean | true \| false | false | Whether the options menu overlay is shown. Drives `aria-expanded`. |
+    | value | text | (string) | – | Selected option label shown in the Field. Renders the "Selected Option" content state. |
+    | placeholder | text | (string) | – | Shown when no value is selected. Renders the "Placeholder Text" content state. |
+    | hasLabel | boolean | true \| false | true | Whether the Label container renders. |
+    | label | text | (string) | "Label" | Field label. Only visible when `hasLabel=true`. |
+    | requirement | variant | none \| required \| optional | none | Mutually-exclusive marker. required exposes `aria-required=true`. |
+    | hasHelperText | boolean | true \| false | true | Whether the Helper text row renders below the Field. |
+    | helperText | text | (string) | "Helper text" | Supporting text. Only visible when `hasHelperText=true`. |
+    | hasErrorText | boolean | true \| false | true | Whether the Error text row renders. Typically paired with `validationState=error`. |
+    | errorText | text | (string) | "Error text" | Validation message. Only visible when `hasErrorText=true`. |
+    | hasScrollingMenu | boolean | true \| false | true | Whether the open menu shows a scroll bar. Only meaningful when `isMenuOpen=true`. |
+
+    <Accordion title="Menu item [identity unresolved]">
+      Repeated option row inside the open menu, modelled in Figma as the private `.Menu item` instance. Engineers supply these as an options array; rendered only when `isMenuOpen=true`. Single documented prop: `label` (option display text, Figma default "Option"). See the Warning above — confirm the contract against Storybook.
+    </Accordion>
+
+    <Accordion title="State axis mapping">
+      | Figma `State` | isDisabled | Runtime condition |
+      | --- | --- | --- |
+      | Default | false | rest |
+      | Hover | false | hovered (transient, platform-handled) |
+      | Focus | false | focused (transient, platform-handled) |
+      | Disabled | true | isDisabled |
+    </Accordion>
+
+    <Accordion title="Worked examples">
+      - **Closed with placeholder** — `label: "Country"`, `placeholder: "Select a country"`, `helperText: "Choose your country of residence"`
+      - **Open with value** — `value: "United Kingdom"`, `isMenuOpen: true`, `hasScrollingMenu: true`
+      - **Required in error** — `validationState: error`, `requirement: required`, `errorText: "Please select a country"`
+      - **Disabled optional** — `isDisabled: true`, `requirement: optional`, `placeholder: "Select a region"`
+    </Accordion>
+  </Tab>
+  <Tab title="Structure">
+    > Dropdown has no size or density axis. Validation and State are predominantly colour/visual; the only structural deltas are the field border weight (thickens on Hover/Focus) and the Error state, which inserts an error-text row and a 4px left accent border. Content swaps which text child renders in the Field with no dimensional change. Host container is 320 wide in the design source and owns no padding; each zone owns its spacing. Field insets use fluid spacing tokens; structural gaps use fixed tokens.
+
+    ### Typography
+
+    | Element | Family | Weight | Size | Line height | Style |
+    | --- | --- | --- | --- | --- | --- |
+    | label | Gotham | Bold | 16 | 23 | Body/M Compact Bold |
+    | value / placeholder | Gotham | Book | 16 | 23 | Body/M Compact |
+    | helperText / errorText | Gotham | Book | 14 | 22 | Body/S |
+    | optionalTagLabel | Gotham | Book | 16 | 23 | Body/M Compact |
+
+    ### Composition
+
+    Four zones stack vertically: Label container, Field trigger, Menu overlay (open only), Helper text container. In the Error state an error-text container and left accent border are inserted between field and helper.
+
+    | Zone | Layout | Notes |
+    | --- | --- | --- |
+    | Host container | vertical, hug | 320 wide in design, expected to fill in code; itemSpacing 0 |
+    | Label container | horizontal, fill / hug | Label text \+ requirement marker; paddingBottom `spacing/fixed/xxs` (8) |
+    | Field | fill / hug | Trigger row, minHeight 44; value/placeholder \+ chevron |
+    | Menu container | fixed / fixed | Overlay; collapses to 0 height when closed |
+    | Helper text container | fill / hug | Assistive line; paddingTop `spacing/fixed/xxs` (8) |
+
+    <Accordion title="Field">
+      minHeight 44. Asymmetric padding: start `spacing/fluid/xxs` (12), end `spacing/fixed/l` (32) to reserve room for the chevron. cornerRadius 0, borderWidth 1 (#666666, inside align), clipsContent true. Trailing chevron group: `chevronDown` glyph, iconSize 16, end-aligned with `spacing/fluid/xxs` (12) inset.
+    </Accordion>
+
+    <Accordion title="Menu">
+      Vertical list shown when `isMenuOpen=true`. verticalPadding `spacing/fixed/xxs` (8), horizontalPadding 0, itemSpacing 0. Border 1px (#bdbdbd) on bottom/start/end only — open top joins the field. Each option is a `.Menu item` instance, minHeight 44, fills width. Scroll bar (when `hasScrollingMenu=true`): pill track (cornerRadius 1000), 6px thumb, insets `spacing/fixed/xs` (12) top/bottom, `spacing/fixed/s` (16) end.
+    </Accordion>
+
+    <Accordion title="Interactive states (border weight)">
+      | Spec | Default | Hover | Focus | Disabled |
+      | --- | --- | --- | --- | --- |
+      | Field borderWidth | 1 | bottom edge → 2 | all edges → 2 | 1 |
+      | borderAlign | inside | inside | inside | inside |
+
+      Hover thickens only the bottom edge; Focus thickens all edges uniformly.
+    </Accordion>
+
+    <Accordion title="Error state inserts">
+      Error-text container: paddingTop `spacing/fixed/xs` (12), itemSpacing `spacing/fixed/xxxs` (4); warning glyph `triangle-exclamation` iconSize 16; error text Body/S. Error border: 4px accent stroke on the start edge only, outside align (sits flush to the left), paddingEnd `spacing/fixed/sm` (20).
+    </Accordion>
+  </Tab>
+  <Tab title="Color">
+    > Validation drives field border, validation icon, and error-text colour; State drives border emphasis and disabled dimming. Content does not affect tokens. Menu surface, options, scrollbar, and shadow are constant across validation and state.
+
+    ### Default validation
+
+    | Element | rest | hovered | focused | isDisabled |
+    | --- | --- | --- | --- | --- |
+    | Label | text/default (#1A1A1A) | text/default | text/default | text/subtle (#525252) |
+    | Field fill | surface/default (#FFFFFF) | surface/default | surface/default | surface/layer-1 (#FAF8F6) |
+    | Field value text | text/default (#1A1A1A) | text/default | text/default | text/subtle (#525252) |
+    | Field stroke | border/subtle (#666666) | border/default (#1A1A1A) | border/default | border/subtle (#666666) |
+    | Chevron icon | icon/subtler (#666666) | icon/subtler | icon/subtler | icon/subtler |
+    | Helper text | text/subtle (#525252) | text/subtle | text/subtle | text/subtlest (#7A7A7A) |
+
+    ### Error validation (deltas)
+
+    | Element | rest | isDisabled |
+    | --- | --- | --- |
+    | Field stroke | border/error (#C00B28) | border/subtle (#666666) |
+    | Error border | border/error (#C00B28) | border/error |
+    | Validation icon | icon/error (#C00B28) | icon/error |
+    | Error text | text/error (#C00B28) | text/error |
+
+    <Accordion title="Menu surface (constant across validation/state)">
+      Menu fill surface/default (#FFFFFF), stroke border/subtlest (#BDBDBD), shadow Depth-1. Option text text/default (#1A1A1A). Scroll bar grey/05 (#E8E8E8), thumb grey/60 (#525252).
+    </Accordion>
+
+    <Note>
+      Success validation is a colour-only state (success icon and check glyph) with no structural delta — see the spec's full Success table in the source if you need the exact tokens. Flagged binding issue: the disabled success glyph binds the `Core/white` primitive instead of the `icon/inverse` semantic. Raised with design.
+    </Note>
+  </Tab>
+  <Tab title="Voice / Screen reader">
+    > Dropdown is a single-select combobox: the Field trigger opens a popup listbox. Label, requirement marker, selected value/placeholder, and helper text all merge into the Field's announcement — not separate stops. Two focus stops: (1) the Field, always present; (2) each Menu item, reachable only while open. On web the listbox uses `aria-activedescendant` so DOM focus stays on the combobox; iOS and Android move focus into the option rows. Error text is the Field's error description, not a focus stop. Disabled removes the Field from focus order entirely.
+
+    ### Focus order
+
+    | # | Part | Announcement | Role | Notes |
+    | --- | --- | --- | --- | --- |
+    | 1 | Field | "Label, \[value or placeholder\], combo box, Helper text" | combobox / popup button | Has popup: listbox |
+    | 2 | Menu item | "Option, X of N" | option (within listbox) | Menu open only |
+
+    ### Closed — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | role | combobox | Prefer a native `<select>` or a button with `role="combobox"`. |
+    | aria-labelledby | label-id | Associate the visible label, don't duplicate via `aria-label`. |
+    | aria-expanded | false | Collapsed; popup not shown. |
+    | aria-haspopup | listbox | Opens a listbox of options. |
+    | aria-describedby | helper-id | Helper text as description. |
+
+    ### Open & error — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | aria-expanded | true | Popup listbox shown. |
+    | aria-activedescendant | active-option-id | Virtually focuses an option without moving DOM focus. |
+    | option role | option \+ aria-selected | One selected option; `aria-posinset` / `aria-setsize` for "X of N". |
+    | aria-invalid | true | Error state, set on the field. |
+    | aria-errormessage / aria-describedby | error-id | Error text replaces helper as the description. |
+
+    <Accordion title="iOS (VoiceOver) & Android (TalkBack)">
+      **VoiceOver** — closed: "Country, United Kingdom, button, \[helper\]" via `accessibilityValue` \+ `accessibilityHint`; open: trait stays `.isButton`, value becomes "Expanded", focus moves into option rows ("Option, 1 of 6", `.isSelected` on the chosen one); error folds "invalid data" \+ message into value/hint; disabled uses `.notEnabled`. **TalkBack** — role `Role.DropdownList`, label via `mergeDescendants`, `stateDescription` carries the value then "Expanded"; options use `collectionItemInfo` for position; error via `error(message)` \+ polite live region; disabled via `disabled()`. In both, keep the Field at stop 1 across states, and hide the chevron and scrollbar.
+    </Accordion>
+
+    ### Disabled — ARIA
+
+    | Property | Value | Notes |
+    | --- | --- | --- |
+    | aria-disabled | true | Pair with a non-focusable native disabled control where possible. |
+    | Do NOT | keep it in the tab order | Remove tabindex or use a native `disabled` control. |
+  </Tab>
+</Tabs>
+
+---
+
+<Card title="Live component" icon="play" href="https://YOUR-STORYBOOK-URL/?path=/story/components-dropdown">
+  Replace the URL with the Storybook story. If the URLs are stable we can embed the iframe inline here instead of linking out.
+</Card>
